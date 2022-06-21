@@ -7,7 +7,7 @@ use r_efi::{
     system::{AllocateType, MemoryDescriptor, MemoryType},
 };
 
-type Result<T> = core::result::Result<T, errors::Error>;
+pub type Result<T> = core::result::Result<T, errors::StatusError>;
 
 /// Call EFI_ALLOCATE_POOL boot service function.
 /// This function treats Warnings as error right now. This might
@@ -20,7 +20,7 @@ pub fn allocate_pool(
     ptr: &mut *mut c_void,
 ) -> Result<()> {
     let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::Error::NullPtr("Boot Services"))?;
+    helpers::null_check_mut(boot_services, errors::StatusError::NullPtr("Boot Services"))?;
 
     // TODO: Check if the assumption that allocate_pool_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
@@ -30,8 +30,8 @@ pub fn allocate_pool(
 
     helpers::status_to_result(
         status,
-        errors::Error::UEFIWarning(status.as_usize()),
-        errors::Error::UEFIError(status.as_usize()),
+        errors::StatusError::UEFIWarning(status.as_usize()),
+        errors::StatusError::UEFIError(status.as_usize()),
     )
 }
 
@@ -39,7 +39,7 @@ pub fn allocate_pool(
 /// SAFETY : The `st` pointer must be valid.
 pub fn free_pool(st: &mut *mut SystemTable, ptr: *mut c_void) -> Result<()> {
     let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::Error::NullPtr("Boot Services"))?;
+    helpers::null_check_mut(boot_services, errors::StatusError::NullPtr("Boot Services"))?;
 
     // TODO: Check if the assumption that free_pool_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
@@ -49,8 +49,8 @@ pub fn free_pool(st: &mut *mut SystemTable, ptr: *mut c_void) -> Result<()> {
 
     helpers::status_to_result(
         status,
-        errors::Error::UEFIWarning(status.as_usize()),
-        errors::Error::UEFIError(status.as_usize()),
+        errors::StatusError::UEFIWarning(status.as_usize()),
+        errors::StatusError::UEFIError(status.as_usize()),
     )
 }
 
@@ -64,7 +64,7 @@ pub fn allocate_pages(
     memory_address: *mut PhysicalAddress,
 ) -> Result<()> {
     let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::Error::NullPtr("Boot Services"))?;
+    helpers::null_check_mut(boot_services, errors::StatusError::NullPtr("Boot Services"))?;
 
     // TODO: Check if the assumption that allocate_pages_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
@@ -74,8 +74,8 @@ pub fn allocate_pages(
 
     helpers::status_to_result(
         status,
-        errors::Error::UEFIWarning(status.as_usize()),
-        errors::Error::UEFIError(status.as_usize()),
+        errors::StatusError::UEFIWarning(status.as_usize()),
+        errors::StatusError::UEFIError(status.as_usize()),
     )
 }
 
@@ -87,7 +87,7 @@ pub fn free_pages(
     pages: usize,
 ) -> Result<()> {
     let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::Error::NullPtr("Boot Services"))?;
+    helpers::null_check_mut(boot_services, errors::StatusError::NullPtr("Boot Services"))?;
 
     // TODO: Check if the assumption that free_pages_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
@@ -97,8 +97,8 @@ pub fn free_pages(
 
     helpers::status_to_result(
         status,
-        errors::Error::UEFIWarning(status.as_usize()),
-        errors::Error::UEFIError(status.as_usize()),
+        errors::StatusError::UEFIWarning(status.as_usize()),
+        errors::StatusError::UEFIError(status.as_usize()),
     )
 }
 
@@ -113,7 +113,7 @@ pub fn get_memory_map(
     descriptor_version: &mut u32,
 ) -> Result<()> {
     let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::Error::NullPtr("Boot Services"))?;
+    helpers::null_check_mut(boot_services, errors::StatusError::NullPtr("Boot Services"))?;
 
     // TODO: Check if the assumption that get_memory_map_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
@@ -129,7 +129,7 @@ pub fn get_memory_map(
 
     helpers::status_to_result(
         status,
-        errors::Error::UEFIWarning(status.as_usize()),
-        errors::Error::UEFIError(status.as_usize()),
+        errors::StatusError::UEFIWarning(status.as_usize()),
+        errors::StatusError::UEFIError(status.as_usize()),
     )
 }
