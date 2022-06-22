@@ -46,3 +46,33 @@ impl<T> GlobalData<T> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_init_first() {
+        let mut temp = 10;
+        let tmp_ptr: *mut u32 = &mut temp;
+
+        let global_data = GlobalData::new();
+        assert!(global_data.init(tmp_ptr).is_ok());
+    }
+
+    #[test]
+    fn check_init_second() {
+        let mut temp = 10;
+        let tmp_ptr: *mut u32 = &mut temp;
+
+        let global_data = GlobalData::new();
+        assert!(global_data.init(tmp_ptr).is_ok());
+        assert!(global_data.init(tmp_ptr).is_err());
+    }
+
+    #[test]
+    fn check_without_init() {
+        let mut global_data: GlobalData<usize> = GlobalData::new();
+        assert!(global_data.get_mut().is_err());
+    }
+}
