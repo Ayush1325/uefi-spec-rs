@@ -37,10 +37,10 @@ impl<T> GlobalData<T> {
 
     /// This return value is a Result mutable reference of internal pointer if it is not null. It
     /// returns a `NullError` if the internal pointer is NULL.
-    pub fn get_mut(&mut self) -> Result<&mut *mut T, errors::NullError> {
+    pub fn get_mut(&mut self) -> Result<&mut *mut T, errors::NullPtrError> {
         let r = self.ptr.get_mut();
         if (*r).is_null() {
-            Err(errors::NullError)
+            Err(errors::NullPtrError::new("Global Data"))
         } else {
             Ok(r)
         }

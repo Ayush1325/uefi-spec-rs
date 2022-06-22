@@ -23,3 +23,6 @@ r-efi = { path = "../../r-efi" }
 examples = []
 rustc-dep-of-std = ['core', 'compiler_builtins/rustc-dep-of-std']
 
+[[example]]
+name = "simple-text-output"
+required-features = ["examples"]
