@@ -18,10 +18,15 @@ impl<T> GlobalData<T> {
         }
     }
 
-    /// SAFETY: This function will only initialize the pointer if it is null.
+    /// SAFETY: This function will only initialize once.
     /// The return value is a Result containing nothing if it is success. In the case of an
     /// error, it returns the previous pointer.
     pub fn init(&self, ptr: *mut T) -> Result<(), *mut T> {
+        // Check that the ptr is not null.
+        if ptr.is_null() {
+            return Err(ptr);
+        }
+
         let r = self.ptr.compare_exchange(
             core::ptr::null_mut(),
             ptr,
@@ -74,5 +79,11 @@ mod tests {
     fn check_without_init() {
         let mut global_data: GlobalData<usize> = GlobalData::new();
         assert!(global_data.get_mut().is_err());
+    }
+
+    #[test]
+    fn check_init_null() {
+        let global_data: GlobalData<usize> = GlobalData::new();
+        assert!(global_data.init(core::ptr::null_mut()).is_err())
     }
 }

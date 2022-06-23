@@ -26,3 +26,7 @@ rustc-dep-of-std = ['core', 'compiler_builtins/rustc-dep-of-std']
 [[example]]
 name = "simple-text-output"
 required-features = ["examples"]
+
+[[example]]
+name = "memory-allocation-services"
+required-features = ["examples"]
