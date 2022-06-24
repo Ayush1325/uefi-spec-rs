@@ -21,7 +21,7 @@ r-efi = { path = "../../r-efi" }
 # use a UEFI target configuration. To make `cargo test` work, we exclude all
 # examples from normal runs.
 examples = []
-rustc-dep-of-std = ['core', 'compiler_builtins/rustc-dep-of-std']
+rustc-dep-of-std = ['core', 'compiler_builtins/rustc-dep-of-std', 'r-efi/rustc-dep-of-std']
 
 [[example]]
 name = "simple-text-output"

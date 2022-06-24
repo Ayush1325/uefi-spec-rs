@@ -1,11 +1,10 @@
 //! This module contains functions related to Memory Allocation.
 
-use crate::{errors, helpers};
-use core::ffi::c_void;
-use r_efi::{
-    efi::{PhysicalAddress, SystemTable},
-    system::{AllocateType, MemoryDescriptor, MemoryType},
+use crate::{
+    efi::{AllocateType, MemoryDescriptor, MemoryType, PhysicalAddress, SystemTable},
+    errors, helpers,
 };
+use core::ffi::c_void;
 
 pub type Result<T> = core::result::Result<T, errors::StatusNullError>;
 
@@ -15,14 +14,12 @@ pub type Result<T> = core::result::Result<T, errors::StatusNullError>;
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
 pub fn allocate_pool(
-    st: &mut *mut SystemTable,
+    st: *mut SystemTable,
     memtype: MemoryType,
     allocate_size: usize,
     ptr: &mut *mut c_void,
 ) -> Result<()> {
-    let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::NullPtrError::new("Boot Services"))?;
-
+    let boot_services = super::get_boot_services(st)?;
     // TODO: Check if the assumption that allocate_pool_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
     let allocate_pool_ptr = unsafe { (*boot_services).allocate_pool };
@@ -35,10 +32,8 @@ pub fn allocate_pool(
 /// Call EFI_FREE_POOL boot service function
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn free_pool(st: &mut *mut SystemTable, ptr: *mut c_void) -> Result<()> {
-    let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::NullPtrError::new("Boot Services"))?;
-
+pub fn free_pool(st: *mut SystemTable, ptr: *mut c_void) -> Result<()> {
+    let boot_services = super::get_boot_services(st)?;
     // TODO: Check if the assumption that free_pool_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
     let free_pool_ptr = unsafe { (*boot_services).free_pool };
@@ -52,15 +47,13 @@ pub fn free_pool(st: &mut *mut SystemTable, ptr: *mut c_void) -> Result<()> {
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
 pub fn allocate_pages(
-    st: &mut *mut SystemTable,
+    st: *mut SystemTable,
     alloc_type: AllocateType,
     memtype: MemoryType,
     pages: usize,
     memory_address: *mut PhysicalAddress,
 ) -> Result<()> {
-    let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::NullPtrError::new("Boot Services"))?;
-
+    let boot_services = super::get_boot_services(st)?;
     // TODO: Check if the assumption that allocate_pages_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
     let allocate_pages_ptr = unsafe { (*boot_services).allocate_pages };
@@ -74,12 +67,11 @@ pub fn allocate_pages(
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
 pub fn free_pages(
-    st: &mut *mut SystemTable,
+    st: *mut SystemTable,
     memory_address: PhysicalAddress,
     pages: usize,
 ) -> Result<()> {
-    let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::NullPtrError::new("Boot Services"))?;
+    let boot_services = super::get_boot_services(st)?;
 
     // TODO: Check if the assumption that free_pages_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
@@ -94,16 +86,14 @@ pub fn free_pages(
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
 pub fn get_memory_map(
-    st: &mut *mut SystemTable,
+    st: *mut SystemTable,
     memory_map_address: &mut usize,
     memory_map: &mut MemoryDescriptor,
     map_key: &mut usize,
     descriptor_size: &mut usize,
     descriptor_version: &mut u32,
 ) -> Result<()> {
-    let boot_services = unsafe { (*(*st)).boot_services };
-    helpers::null_check_mut(boot_services, errors::NullPtrError::new("Boot Services"))?;
-
+    let boot_services = super::get_boot_services(st)?;
     // TODO: Check if the assumption that get_memory_map_ptr will be valid as long as boot_services
     // ptr is valid. Else this might need change upstream in r-efi
     let get_memory_map_ptr = unsafe { (*boot_services).get_memory_map };

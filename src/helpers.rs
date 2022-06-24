@@ -1,9 +1,9 @@
-use crate::errors::StatusError;
+use crate::errors::{NullPtrError, StatusError};
 
 #[inline]
-pub(crate) fn null_check_mut<T, E>(ptr: *mut T, err: E) -> Result<(), E> {
+pub(crate) fn null_check_mut<T>(ptr: *mut T, err: &'static str) -> Result<(), NullPtrError> {
     if ptr.is_null() {
-        Err(err)
+        Err(NullPtrError::new(err))
     } else {
         Ok(())
     }

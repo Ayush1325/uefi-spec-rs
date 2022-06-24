@@ -1,17 +1,18 @@
 //! This module contains functions related to SimpleTextOutput Protocol
 
+use crate::efi::{Boolean, SystemTable};
 use crate::{errors, helpers};
-use r_efi::{efi::Boolean, protocols::simple_text_output, system::SystemTable};
+use r_efi::protocols::simple_text_output;
 
 pub type Result<T> = core::result::Result<T, errors::StatusNullError>;
 
 /// Call `Reset` function from `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL`.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn reset(st: &mut *mut SystemTable, extended_verification: bool) -> Result<()> {
+pub fn reset(st: *mut SystemTable, extended_verification: bool) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let reset_ptr = conn_out_protocol.reset;
+    let reset_ptr = unsafe { (*conn_out_protocol).reset };
 
     let status = (reset_ptr)(conn_out_protocol, Boolean::from(extended_verification));
 
@@ -21,10 +22,10 @@ pub fn reset(st: &mut *mut SystemTable, extended_verification: bool) -> Result<(
 /// Call `OutputString` function from `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL`.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn output_string(st: &mut *mut SystemTable, string: &mut [u16]) -> Result<()> {
+pub fn output_string(st: *mut SystemTable, string: &mut [u16]) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let output_string_ptr = conn_out_protocol.output_string;
+    let output_string_ptr = unsafe { (*conn_out_protocol).output_string };
 
     let status = (output_string_ptr)(conn_out_protocol, string.as_mut_ptr());
 
@@ -34,10 +35,10 @@ pub fn output_string(st: &mut *mut SystemTable, string: &mut [u16]) -> Result<()
 /// Call `TestString` function from `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL`.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn test_string(st: &mut *mut SystemTable, string: &mut [u16]) -> Result<()> {
+pub fn test_string(st: *mut SystemTable, string: &mut [u16]) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let test_string_ptr = conn_out_protocol.test_string;
+    let test_string_ptr = unsafe { (*conn_out_protocol).test_string };
 
     let status = (test_string_ptr)(conn_out_protocol, string.as_mut_ptr());
 
@@ -48,14 +49,14 @@ pub fn test_string(st: &mut *mut SystemTable, string: &mut [u16]) -> Result<()> 
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
 pub fn query_mode(
-    st: &mut *mut SystemTable,
+    st: *mut SystemTable,
     mode_number: usize,
     columns: &mut usize,
     rows: &mut usize,
 ) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let query_mode_ptr = conn_out_protocol.query_mode;
+    let query_mode_ptr = unsafe { (*conn_out_protocol).query_mode };
 
     let status = (query_mode_ptr)(conn_out_protocol, mode_number, columns, rows);
 
@@ -65,10 +66,10 @@ pub fn query_mode(
 /// Call `SetMode` function from `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL`.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn set_mode(st: &mut *mut SystemTable, mode_number: usize) -> Result<()> {
+pub fn set_mode(st: *mut SystemTable, mode_number: usize) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let set_mode_ptr = conn_out_protocol.set_mode;
+    let set_mode_ptr = unsafe { (*conn_out_protocol).set_mode };
 
     let status = (set_mode_ptr)(conn_out_protocol, mode_number);
 
@@ -78,10 +79,10 @@ pub fn set_mode(st: &mut *mut SystemTable, mode_number: usize) -> Result<()> {
 /// Call `SetAttribute` function from `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL`.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn set_attribute(st: &mut *mut SystemTable, attribute: usize) -> Result<()> {
+pub fn set_attribute(st: *mut SystemTable, attribute: usize) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let set_attribute_ptr = conn_out_protocol.set_attribute;
+    let set_attribute_ptr = unsafe { (*conn_out_protocol).set_attribute };
 
     let status = (set_attribute_ptr)(conn_out_protocol, attribute);
 
@@ -91,10 +92,10 @@ pub fn set_attribute(st: &mut *mut SystemTable, attribute: usize) -> Result<()> 
 /// Call `ClearScreen` function from `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL`.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn clear_screen(st: &mut *mut SystemTable) -> Result<()> {
+pub fn clear_screen(st: *mut SystemTable) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let clear_screen_ptr = conn_out_protocol.clear_screen;
+    let clear_screen_ptr = unsafe { (*conn_out_protocol).clear_screen };
 
     let status = (clear_screen_ptr)(conn_out_protocol);
 
@@ -104,10 +105,10 @@ pub fn clear_screen(st: &mut *mut SystemTable) -> Result<()> {
 /// Call `SetCursorPostion` function from `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL`.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn set_cursor_position(st: &mut *mut SystemTable, column: usize, row: usize) -> Result<()> {
+pub fn set_cursor_position(st: *mut SystemTable, column: usize, row: usize) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let set_cursor_position_ptr = conn_out_protocol.set_cursor_position;
+    let set_cursor_position_ptr = unsafe { (*conn_out_protocol).set_cursor_position };
 
     let status = (set_cursor_position_ptr)(conn_out_protocol, column, row);
 
@@ -117,10 +118,10 @@ pub fn set_cursor_position(st: &mut *mut SystemTable, column: usize, row: usize)
 /// Call `EnableCursor` function from `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL`.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn enable_cursor(st: &mut *mut SystemTable, visible: bool) -> Result<()> {
+pub fn enable_cursor(st: *mut SystemTable, visible: bool) -> Result<()> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
 
-    let enable_cursor_ptr = conn_out_protocol.enable_cursor;
+    let enable_cursor_ptr = unsafe { (*conn_out_protocol).enable_cursor };
 
     let status = (enable_cursor_ptr)(conn_out_protocol, Boolean::from(visible));
 
@@ -131,11 +132,11 @@ pub fn enable_cursor(st: &mut *mut SystemTable, visible: bool) -> Result<()> {
 /// The returned Mode has the same lifetime as the `st` argument.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub fn get_mode<'a>(
-    st: &'a mut *mut SystemTable,
-) -> core::result::Result<&'a mut simple_text_output::Mode, errors::NullPtrError> {
+pub unsafe fn get_mode<'a>(
+    st: *mut SystemTable,
+) -> core::result::Result<*mut simple_text_output::Mode, errors::NullPtrError> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
-    Ok(unsafe { &mut *conn_out_protocol.mode })
+    Ok(unsafe { (*conn_out_protocol).mode })
 }
 
 /// Get the `EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL` from SystemTable.
@@ -145,9 +146,9 @@ pub fn get_mode<'a>(
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
 pub unsafe fn get_protocol<'a>(
-    st: &'a mut *mut SystemTable,
-) -> core::result::Result<&'a mut simple_text_output::Protocol, errors::NullPtrError> {
-    let conn_out_protocol = unsafe { (*(*st)).con_out };
-    helpers::null_check_mut(conn_out_protocol, errors::NullPtrError::new("Conn Out"))?;
-    Ok(unsafe { &mut *conn_out_protocol })
+    st: *mut SystemTable,
+) -> core::result::Result<*mut simple_text_output::Protocol, errors::NullPtrError> {
+    let conn_out_protocol = unsafe { (*st).con_out };
+    helpers::null_check_mut(conn_out_protocol, "Conn Out")?;
+    Ok(conn_out_protocol)
 }

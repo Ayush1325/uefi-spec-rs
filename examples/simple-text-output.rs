@@ -1,7 +1,7 @@
 #![no_main]
 #![no_std]
 
-use r_efi::efi;
+use uefi_spec::efi;
 use uefi_spec::{global_data::GlobalData, protocols::simple_text_output};
 
 #[panic_handler]
@@ -20,13 +20,13 @@ pub extern "C" fn main(_h: efi::Handle, st: *mut efi::SystemTable) -> efi::Statu
         0x0000u16, //                                             NUL
     ];
 
-    let mut system_table = GlobalData::new();
+    let system_table = GlobalData::new();
     let r = system_table.init(st);
     if r.is_err() {
         return efi::Status::ABORTED;
     }
 
-    let st_ref = match system_table.get_mut() {
+    let st_ref = match system_table.load() {
         Ok(x) => x,
         Err(_) => return efi::Status::ABORTED,
     };

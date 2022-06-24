@@ -9,8 +9,8 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use core::alloc::GlobalAlloc;
 
-use r_efi::efi;
 use uefi_spec::boot_services::memory_allocation_services;
+use uefi_spec::efi;
 use uefi_spec::global_data::GlobalData;
 use uefi_spec::protocols::simple_text_output;
 
@@ -29,14 +29,12 @@ const POOL_ALIGNMENT: usize = 8;
 #[global_allocator]
 static GLOBAL_ALLOCATOR: Allocator = Allocator;
 
-static mut GLOBAL_SYSTEM_TABLE: GlobalData<efi::SystemTable> = GlobalData::new();
+static GLOBAL_SYSTEM_TABLE: GlobalData<efi::SystemTable> = GlobalData::new();
 
 pub fn efi_run() -> efi::Status {
-    let st = unsafe {
-        match GLOBAL_SYSTEM_TABLE.get_mut() {
-            Ok(x) => x,
-            Err(_) => return efi::Status::ABORTED,
-        }
+    let st = match GLOBAL_SYSTEM_TABLE.load() {
+        Ok(x) => x,
+        Err(_) => return efi::Status::ABORTED,
     };
 
     let s: String;
@@ -59,7 +57,7 @@ pub fn efi_run() -> efi::Status {
 
 #[export_name = "efi_main"]
 pub extern "C" fn main(_h: efi::Handle, st: *mut efi::SystemTable) -> efi::Status {
-    let r = unsafe { GLOBAL_SYSTEM_TABLE.init(st) };
+    let r = GLOBAL_SYSTEM_TABLE.init(st);
     if r.is_err() {
         return efi::Status::ABORTED;
     }
@@ -71,11 +69,9 @@ struct Allocator;
 
 unsafe impl GlobalAlloc for Allocator {
     unsafe fn alloc(&self, layout: core::alloc::Layout) -> *mut u8 {
-        let st = unsafe {
-            match GLOBAL_SYSTEM_TABLE.get_mut() {
-                Ok(x) => x,
-                Err(_) => return core::ptr::null_mut(),
-            }
+        let st = match GLOBAL_SYSTEM_TABLE.load() {
+            Ok(x) => x,
+            Err(_) => return core::ptr::null_mut(),
         };
 
         let align = layout.align();
@@ -99,11 +95,9 @@ unsafe impl GlobalAlloc for Allocator {
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: core::alloc::Layout) {
-        let st = unsafe {
-            match GLOBAL_SYSTEM_TABLE.get_mut() {
-                Ok(x) => x,
-                Err(_) => return,
-            }
+        let st = match GLOBAL_SYSTEM_TABLE.load() {
+            Ok(x) => x,
+            Err(_) => return,
         };
 
         if layout.size() != 0 {

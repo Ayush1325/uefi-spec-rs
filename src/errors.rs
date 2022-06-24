@@ -1,6 +1,6 @@
 //! This module contains various error types used in this crate
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
 pub enum StatusNullError {
     NullPtrError(&'static str),
     UefiWarning(usize),
@@ -22,13 +22,13 @@ impl From<NullPtrError> for StatusNullError {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
 pub enum StatusError {
     UefiWarning(usize),
     UefiError(usize),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
 pub struct NullPtrError(&'static str);
 
 impl NullPtrError {

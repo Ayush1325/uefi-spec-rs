@@ -1,6 +1,6 @@
 //! This module provides constructs for creating and managing Global Pointers.
 
-use crate::errors;
+use crate::{errors, helpers};
 use core::sync::atomic::{AtomicPtr, Ordering};
 
 /// It is mostly ment to
@@ -50,6 +50,14 @@ impl<T> GlobalData<T> {
             Ok(r)
         }
     }
+
+    /// The return value is a non-null pointer.
+    /// returns a `NullError` if the internal pointer is NULL.
+    pub fn load(&self) -> Result<*mut T, errors::NullPtrError> {
+        let p = self.ptr.load(Ordering::Relaxed);
+        helpers::null_check_mut(p, "Global Data")?;
+        Ok(p)
+    }
 }
 
 #[cfg(test)]
@@ -85,5 +93,19 @@ mod tests {
     fn check_init_null() {
         let global_data: GlobalData<usize> = GlobalData::new();
         assert!(global_data.init(core::ptr::null_mut()).is_err())
+    }
+
+    #[test]
+    fn multiple_refernece() {
+        let mut temp = 10;
+        let tmp_ptr: *mut u32 = &mut temp;
+
+        let global_data = GlobalData::new();
+        assert!(global_data.init(tmp_ptr).is_ok());
+
+        let ref1 = global_data.load().map_err(|_| "help").unwrap();
+        let ref2 = global_data.load().map_err(|_| "help").unwrap();
+
+        assert_eq!(ref1, ref2);
     }
 }
