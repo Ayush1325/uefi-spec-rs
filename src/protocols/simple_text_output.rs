@@ -132,7 +132,7 @@ pub fn enable_cursor(st: *mut SystemTable, visible: bool) -> Result<()> {
 /// The returned Mode has the same lifetime as the `st` argument.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub unsafe fn get_mode<'a>(
+pub unsafe fn get_mode(
     st: *mut SystemTable,
 ) -> core::result::Result<*mut simple_text_output::Mode, errors::NullPtrError> {
     let conn_out_protocol = unsafe { get_protocol(st) }?;
@@ -145,7 +145,7 @@ pub unsafe fn get_mode<'a>(
 /// Thus this function is unsafe to call.
 /// SAFETY : The `st` pointer must be valid. This is gaurenteed if `GlobalData` is used to store
 /// the pointer.
-pub unsafe fn get_protocol<'a>(
+pub unsafe fn get_protocol(
     st: *mut SystemTable,
 ) -> core::result::Result<*mut simple_text_output::Protocol, errors::NullPtrError> {
     let conn_out_protocol = unsafe { (*st).con_out };
